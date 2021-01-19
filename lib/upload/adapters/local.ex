@@ -54,8 +54,8 @@ defmodule Upload.Adapters.Local do
          :ok <- File.cp(path, filename) do
       {:ok, %Upload{upload | status: :transferred}}
     else
-      _ ->
-        {:error, "failed to transfer file"}
+      {:error, posix} ->
+        {:error, posix}
     end
   end
 

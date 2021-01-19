@@ -8,7 +8,7 @@ if Code.ensure_loaded?(Ecto) do
       only: [
         put_change: 3,
         prepare_changes: 2,
-        add_error: 3
+        add_error: 4
       ]
 
     @doc """
@@ -67,7 +67,10 @@ if Code.ensure_loaded?(Ecto) do
           changeset
 
         {:error, message} when is_binary(message) ->
-          Ecto.Changeset.add_error(changeset, field, message)
+          add_error(changeset, field, message, [])
+
+        {:error, reason} ->
+          add_error(changeset, field, "cast_error", [reason: reason])
 
         other ->
           raise """
@@ -76,6 +79,7 @@ if Code.ensure_loaded?(Ecto) do
             {:ok, %Upload{}}          - Casting was successful
             :error                    - Unable to cast value, ignore it
             {:error, "error message"} - Validation error
+            {:error, :reason}         - For erlang errors
 
           Instead, it returned:
 
@@ -103,7 +107,10 @@ if Code.ensure_loaded?(Ecto) do
             put_upload(changeset, field, upload)
 
           {:error, message} when is_binary(message) ->
-            add_error(changeset, field, message)
+            add_error(changeset, field, message, [])
+
+          {:error, reason} ->
+            add_error(changeset, field, "transfer_error", [reason: reason])
 
           other ->
             raise """
@@ -111,6 +118,7 @@ if Code.ensure_loaded?(Ecto) do
 
               {:ok, %Upload{}}
               {:error, "error message"}
+              {:error, :reason}
 
             Instead, it returned:
 

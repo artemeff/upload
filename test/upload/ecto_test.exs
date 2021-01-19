@@ -78,12 +78,11 @@ defmodule Upload.EctoTest do
       assert changeset.errors == [logo: {"PANIC!!!", []}]
     end
 
-    test "raises when it receives an invalid signature", %{upload: upload} do
-      assert_raise RuntimeError, fn ->
-        Company.change()
-        |> Upload.Ecto.put_upload(:logo, upload, with: BrokenUploader)
-        |> run_prepared_changes()
-      end
+    test "don't raises when it receives an invalid signature", %{upload: upload} do
+      changeset = Company.change()
+      changeset = Upload.Ecto.put_upload(changeset, :logo, upload, with: BrokenUploader)
+      changeset = run_prepared_changes(changeset)
+      assert changeset.errors == [logo: {"transfer_error", [reason: %{foo: "bar"}]}]
     end
   end
 
@@ -121,10 +120,9 @@ defmodule Upload.EctoTest do
       assert changeset.errors == [logo: {"cast: meatloaf", []}]
     end
 
-    test "raises when it receives an invalid signature" do
-      assert_raise RuntimeError, fn ->
-        cast_and_upload("meatloaf", with: BrokenUploader)
-      end
+    test "don't raises when it receives an invalid signature" do
+      changeset = cast_and_upload("meatloaf", with: BrokenUploader)
+      assert changeset.errors == [logo: {"cast_error", [reason: %{foo: "bar"}]}]
     end
   end
 
@@ -162,10 +160,9 @@ defmodule Upload.EctoTest do
       assert changeset.errors == [logo: {"cast path: meatloaf", []}]
     end
 
-    test "raises when it receives an invalid signature" do
-      assert_raise RuntimeError, fn ->
-        cast_and_upload_path("meatloaf", with: BrokenUploader)
-      end
+    test "don't raises when it receives an invalid signature" do
+      changeset = cast_and_upload_path("meatloaf", with: BrokenUploader)
+      assert changeset.errors == [logo: {"cast_error", [reason: %{foo: "bar"}]}]
     end
   end
 
